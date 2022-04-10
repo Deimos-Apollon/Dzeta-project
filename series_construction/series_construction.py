@@ -101,7 +101,7 @@ def create_one_series_a_m_zero(zeros, m: int) -> acb_mat:
     Creates Dirichlet series with coefs a_1=1 and a_m=0 (indexing starts from 1)
 
     :param zeros: list of zeta-function zeros
-    :param m: coef's index, a_m will be = 0
+    :param m: coef's index, a_m will be = 0, m in [2, len(zeros)+1]
     :return: acb_mat 1xN of series' coefs, N - number of zeros+1
     """
     # a_1 = 1 переносим вправо, поэтому длина = len(zeros)
