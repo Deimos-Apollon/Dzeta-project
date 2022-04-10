@@ -3,15 +3,15 @@ from flint import *
 
 class DirichletSeries:
     """
-    Class which represents Dirichlet series with given coefficients. Can be called with
-    various x values multiple times.
+    Class represents Dirichlet series with given coefficients. Can be called with
+    various s values multiple times.
     """
     def __init__(self, coefs):
         """
-        :param coefs: series coefficients
+        :param coefs: acb_mat 1xN - series coefficients
         """
         self.coefs = coefs
-        self.coefs_num = coefs.nrows()
+        self.coefs_num = coefs.ncols()
 
     def __call__(self, s) -> acb:
         """
@@ -20,13 +20,19 @@ class DirichletSeries:
         :param s: complex number
         :return: complex value - sum of series in point s
         """
-        value = acb(0)
+        value = acb('0')
         for i in range(self.coefs_num):
-            value += self.coefs[i, 0] * acb(i + 1).pow(-s)
+            value += self.coefs[0, i] * acb(i + 1).pow(-s)
         return value
 
 
 def create_one_series(zeros):
+    """
+    Creates Dirichlet series from zeros.
+
+    :param zeros: list of zeta-function zeros
+    :return: acb_mat 1xN of series' coefs, N - number of zeros+1
+    """
     n = len(zeros) + 1
     a = acb_mat(n, n)
     # заполняем матрицу коэффициентов
@@ -43,16 +49,15 @@ def create_one_series(zeros):
     b[n - 1, 0] = 1
 
     x = a.solve(b)
-    return x
+    return x.transpose()
 
 
 def create_many_series(zeros) -> acb_mat:
     """
-    Функция, позволяющая построить сразу несколько рядов Дирихле, используя разное кол-во
-    переданных нетривиальных нулей дзета-функции Римана.
+    Creates many Dirichlet series from zeros, using n zeros for each series, n=1...len(zeros).
 
-    :param zeros: используемые для ряда нули
-    :return: n рядов Дирихле
+    :param zeros: list of zeta-function zeros
+    :return: acb_mat NxN, where N=len(zeros)+2, with series coefs (first and last two rows is 0)
     """
     diagonal = acb_mat(len(zeros) + 2, len(zeros) + 2, 0)
     diag = acb_mat(len(zeros) + 2, len(zeros) + 2, 0)
@@ -90,45 +95,32 @@ def create_many_series(zeros) -> acb_mat:
             a[j, k] = lin_vect_elem_new[j, k] * inv_n_tildedelta[j, 0]
     return a
 
-# старая функция на всякий случай
-# def _old_create_series(zeros):
-#     """
-#     :param zeros: используемые для ряда нули
-#     :return: n рядов Дирихле
-#     """
-#     DIAGONAL = acb_mat([[0] for i in range(len(zeros) + 2)])
-#     diag = acb_mat([[0] for i in range(len(zeros) + 2)])
-#     InvNTildedelta = acb_mat([[0] for i in range(len(zeros) + 2)])
-#     L = acb_mat(len(zeros) + 2, len(zeros) + 2)
-#     LinVectElemNew = acb_mat(len(zeros) + 2, len(zeros) + 2)
-#     a = acb_mat(len(zeros) + 2, len(zeros) + 2)
-#     M = acb_mat(len(zeros), len(zeros))
-#
-#     for i in range(len(zeros)):
-#         for j in range(len(zeros)):
-#             M[i, j] = acb(i + 1).pow(-zeros[j])
-#
-#     for i in range(len(zeros)):
-#         diag[i, 0] = M[i, i]
-#         DIAGONAL[i, 0] = diag[i, 0] * (1 if i == 0 else DIAGONAL[i - 1, 0])
-#         for j in range(i + 1, len(zeros)):
-#             z = - M[j, i] / diag[i, 0]
-#             L[j, i] = z
-#             M[j, i] = z
-#             for k in range(i + 1, len(zeros)):
-#                 M[j, k] = M[j, k] + M[i, k] * M[j, i]
-#                 L[j, k] = M[j, k]
-#
-#     for k in range(len(zeros)):
-#         for i in range(k + 1, len(zeros)):
-#             for j in range(i + 1, len(zeros)):
-#                 L[j, k] = L[j, k] + L[i, k] * M[j, i]
-#
-#     for j in range(len(zeros)):
-#         for k in range(j - 1):
-#             LinVectElemNew[j, k] = L[j, k] * (1 if j == 0 else DIAGONAL[j - 1, 0])
-#         LinVectElemNew[j, j] = (1 if j == 0 else DIAGONAL[j - 1, 0])
-#         InvNTildedelta[j, 0] = acb(1) / LinVectElemNew[j, 0]
-#         for k in range(j):
-#             a[j, k] = LinVectElemNew[j, k] * InvNTildedelta[j, 0]
-#     return a
+
+def create_one_series_a_m_zero(zeros, m: int) -> acb_mat:
+    """
+    Creates Dirichlet series with coefs a_1=1 and a_m=0 (indexing starts from 1)
+
+    :param zeros: list of zeta-function zeros
+    :param m: coef's index, a_m will be = 0
+    :return: acb_mat 1xN of series' coefs, N - number of zeros+1
+    """
+    # a_1 = 1 переносим вправо, поэтому длина = len(zeros)
+    n = len(zeros)
+    m -= 2      # -1 из-за специфики метода (а_1 = 1 и переносится вправо) и -1 из-за нумерации
+    a = acb_mat(n, n)
+    # заполняем матрицу коэффициентов
+    for i, nont_zero in enumerate(zeros):
+        for j in range(n):
+            a[i, j] = acb(j + 2).pow(-nont_zero)
+    # добавляем строчку, чтобы определить a_m
+    for i in range(n):
+        a[n-1, i] = acb('0')
+    a[n-1, m] = acb('1')
+
+    # создаем вектор B и делаем последнюю координату =0, чтобы определить a_m = 0
+    b = acb_mat([[acb('-1')] for _ in range(n)])
+    b[n-1, 0] = acb('0')
+
+    x = a.solve(b)
+    ans = acb_mat([[acb('1'), *[elem for elem in x]]])
+    return ans
