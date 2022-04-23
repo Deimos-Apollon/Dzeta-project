@@ -8,10 +8,10 @@ class DirichletSeries:
     """
     def __init__(self, coefs):
         """
-        :param coefs: acb_mat 1xN - series coefficients
+        :param coefs: tuple of N series coefficients
         """
         self.coefs = coefs
-        self.coefs_num = coefs.ncols()
+        self.coefs_num = len(coefs)
 
     def __call__(self, s) -> acb:
         """
@@ -22,7 +22,7 @@ class DirichletSeries:
         """
         value = acb('0')
         for i in range(self.coefs_num):
-            value += self.coefs[0, i] * acb(i + 1).pow(-s)
+            value += self.coefs[i] * acb(i + 1).pow(-s)
         return value
 
 
@@ -49,7 +49,7 @@ def create_one_series(zeros):
     b[n - 1, 0] = 1
 
     x = a.solve(b)
-    return x.transpose()
+    return tuple(elem for elem in x)
 
 
 def create_many_series(zeros) -> acb_mat:
@@ -94,33 +94,3 @@ def create_many_series(zeros) -> acb_mat:
         for k in range(j):
             a[j, k] = lin_vect_elem_new[j, k] * inv_n_tildedelta[j, 0]
     return a
-
-
-def create_one_series_a_m_zero(zeros, m: int) -> acb_mat:
-    """
-    Creates Dirichlet series with coefs a_1=1 and a_m=0 (indexing starts from 1)
-
-    :param zeros: list of zeta-function zeros
-    :param m: coef's index, a_m will be = 0, m in [2, len(zeros)+1]
-    :return: acb_mat 1xN of series' coefs, N - number of zeros+1
-    """
-    # a_1 = 1 переносим вправо, поэтому длина = len(zeros)
-    n = len(zeros)
-    m -= 2      # -1 из-за специфики метода (а_1 = 1 и переносится вправо) и -1 из-за нумерации
-    a = acb_mat(n, n)
-    # заполняем матрицу коэффициентов
-    for i, nont_zero in enumerate(zeros):
-        for j in range(n):
-            a[i, j] = acb(j + 2).pow(-nont_zero)
-    # добавляем строчку, чтобы определить a_m
-    for i in range(n):
-        a[n-1, i] = acb('0')
-    a[n-1, m] = acb('1')
-
-    # создаем вектор B и делаем последнюю координату =0, чтобы определить a_m = 0
-    b = acb_mat([[acb('-1')] for _ in range(n)])
-    b[n-1, 0] = acb('0')
-
-    x = a.solve(b)
-    ans = acb_mat([[acb('1'), *[elem for elem in x]]])
-    return ans
