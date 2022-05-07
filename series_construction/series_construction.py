@@ -64,7 +64,7 @@ def create_many_series(zeros) -> acb_mat:
     inv_n_tildedelta = acb_mat(len(zeros) + 2, len(zeros) + 2, 0)
     l_mat = acb_mat(len(zeros) + 2, len(zeros) + 2, 0)
     lin_vect_elem_new = acb_mat(len(zeros) + 2, len(zeros) + 2, 0)
-    a = acb_mat(len(zeros) + 2, len(zeros) + 2, 0)
+    a = acb_mat(len(zeros), len(zeros), 0)
     m = acb_mat([
         [acb(i + 1).pow(-zeros[j]) for j in range(len(zeros))]
         for i in range(len(zeros))
@@ -87,10 +87,10 @@ def create_many_series(zeros) -> acb_mat:
                 l_mat[j, k] = l_mat[j, k] + l_mat[i, k] * m[j, i]
 
     for j in range(len(zeros)):
-        for k in range(j - 1):
+        for k in range(j):
             lin_vect_elem_new[j, k] = l_mat[j, k] * (1 if j == 0 else diagonal[j - 1, 0])
         lin_vect_elem_new[j, j] = (1 if j == 0 else diagonal[j - 1, 0])
         inv_n_tildedelta[j, 0] = acb(1) / lin_vect_elem_new[j, 0]
-        for k in range(j):
+        for k in range(j + 1):
             a[j, k] = lin_vect_elem_new[j, k] * inv_n_tildedelta[j, 0]
     return a
