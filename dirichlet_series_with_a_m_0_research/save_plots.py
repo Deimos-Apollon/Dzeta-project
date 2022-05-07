@@ -70,15 +70,15 @@ def save_coefs_scatter_a_m_zero(coefs, plot_dir, m):
 
 if __name__ == "__main__":
     # example of usage
-    zeros = read_zeros_conjugate(zeros_num=150,
+    zeros = read_zeros_conjugate(zeros_num=80,
                                  precision=200,
                                  filename='/media/deimos/Мои_файл_/PyCharmProjects/'
                                           'project_on_Riemann_dzeta_function/'
                                           'data_files/NImZetaZero40000_1_40000.val',
                                  )
-    coefs = create_one_series_a_m_zero_a_k_one(zeros, m=4)
-    save_coefs_scatter_a_m_zero(
-                            coefs=coefs[:100],
+    coefs = create_series_a_m_zero_a_k_one(zeros, m=5)
+    save_coefs_plot_a_m_zero(
+                            coefs=coefs[:98],
                             plot_dir='/media/deimos/Мои_файл_/PyCharmProjects'
                                      '/project_on_Riemann_dzeta_function/plots_pictures',
                             m=4)
