@@ -1,7 +1,7 @@
 from matplotlib import pyplot as plt
 
 from src.data_reading.data_reading import read_zeros_conjugate
-from src.dirichlet_series_with_a_m_0.series_construction import create_series_a_m_zero_a_k_one
+from src.dirichlet_series.dirichlet_series_with_a_m_0.series_construction import create_series_a_m_zero_a_k_one
 
 
 def save_coefs_plot_a_m_zero(coefs, plot_dir, m, k):

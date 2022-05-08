@@ -1,8 +1,8 @@
 import random
 
 from src.data_reading.data_reading import read_zeros_conjugate
-from src.dirichlet_series_with_a_m_0.save_plots import save_coefs_plot_many_a_m_zero
-from src.dirichlet_series_with_a_m_0.series_construction import create_series_many_a_i_zero_a_k_one
+from src.dirichlet_series.dirichlet_series_with_a_m_0.save_plots import save_coefs_plot_many_a_m_zero
+from src.dirichlet_series.dirichlet_series_with_a_m_0.series_construction import create_series_many_a_i_zero_a_k_one
 from itertools import combinations
 from sympy.ntheory import factorint
 
@@ -58,14 +58,12 @@ def find_number_of_mod_classes(f):
 
 
 if __name__ == "__main__":
-    zeros_filename = '/media/deimos/Мои_файл_/PyCharmProjects/' \
-                     'project_on_Riemann_dzeta_function/data_files/NImZetaZero40000_1_40000.val'
+    zeros_filename = '/data_files/NImZetaZero40000_1_40000.val'
 
     zeros_num, prec, end_point = 200, 200, 140
     zeros = read_zeros_conjugate(zeros_num=zeros_num, precision=prec, filename=zeros_filename)
 
-    file_dir = "/media/deimos/Мои_файл_/PyCharmProjects/project_on_Riemann_dzeta_function/plots_pictures" \
-               "/research ak=1 and many am=0"
+    file_dir = "/plots_pictures/research ak=1 and many am=0"
 
     #save_plots_and_coefs_many_ai_zero(1, (6, 8, 10), zeros, end_point, file_dir)
 
