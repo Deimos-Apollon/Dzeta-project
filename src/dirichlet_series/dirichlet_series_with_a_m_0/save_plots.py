@@ -1,7 +1,11 @@
+import random
+from itertools import combinations
+
 from matplotlib import pyplot as plt
 
 from src.data_reading.data_reading import read_zeros_conjugate
-from src.dirichlet_series.dirichlet_series_with_a_m_0.series_construction import create_series_a_m_zero_a_k_one
+from src.dirichlet_series.dirichlet_series_with_a_m_0.series_construction import create_series_a_m_zero_a_k_one, \
+    create_series_many_a_i_zero_a_k_one
 
 
 def save_coefs_plot_a_m_zero(coefs, plot_dir, m, k):
@@ -77,14 +81,55 @@ def save_coefs_plot_many_a_m_zero(coefs, plot_filename, plot_title, m_indexes, k
     plt.close()
 
 
+def save_plots_and_coefs_many_ai_zero(k, m_indexes, zeros, end_point, file_dir):
+    """
+    Save plots and coefs for this combination of k and m_indexes.
+
+    :param k: fix a_k = 1
+    :param m_indexes: fix a_m = 0
+    :param zeros: zeta-zeros
+    :param end_point: the last index of a to show in plot (because first 60-70% of all coefs in plot are meaningful)
+    :param file_dir: directory, where plot and coefs files will be stored.
+    :return: None
+    """
+    coefs = create_series_many_a_i_zero_a_k_one(zeros=zeros, m_indexes=m_indexes, k=k)
+
+    filename = f"{file_dir}/a{k}_eq_1_and_"
+    plot_title = f"a_{k}=1 and"
+    for m in m_indexes:
+        filename += f"a_{m}_"
+        plot_title += f" a{m}"
+    filename += f"eq_0"
+    plot_title += f" =0"
+
+    with open(f'{filename}.txt', 'w') as f:
+        for ind, zero in enumerate(coefs, start=1):
+            f.write(f"a_{ind:2}: {zero}\n")
+
+    save_coefs_plot_many_a_m_zero(coefs[:end_point], f"{filename}_close_look.png",
+                                  plot_title=plot_title,
+                                  m_indexes=m_indexes, k=k)
+
+
 if __name__ == "__main__":
-    # example of usage
-    zeros = read_zeros_conjugate(zeros_num=80,
-                                 precision=200,
-                                 filename='/data_files/NImZetaZero40000_1_40000.val',
-                                 )
-    coefs = create_series_a_m_zero_a_k_one(zeros, m=5)
-    save_coefs_plot_a_m_zero(
-                            coefs=coefs[:98],
-                            plot_dir='/plots_pictures',
-                            m=4)
+    zeros_filename = '/data_files/NImZetaZero40000_1_40000.val'
+
+    zeros_num, prec, end_point = 200, 200, 140
+    zeros = read_zeros_conjugate(zeros_num=zeros_num, precision=prec, filename=zeros_filename)
+
+    file_dir = "/plots_pictures/research ak=1 and many am=0"
+
+    #save_plots_and_coefs_many_ai_zero(1, (6, 8, 10), zeros, end_point, file_dir)
+
+    all_indexes = {5, 2, 10, 3, 15, 6, 30, 4, 20, 12, 60}
+    part_of_indexes = {4, 6, 60}
+    for k in part_of_indexes:
+        indexes_tuple = random.sample(tuple(combinations(all_indexes.difference({k, }), 4)), 20)
+        for inds in indexes_tuple:
+            save_plots_and_coefs_many_ai_zero(k, inds, zeros, end_point, file_dir)
+
+    # inds_set = {1, 2, 3, 6, 8, 12}
+    # for k in inds_set:
+    #     indexes_tuple = combinations({1, 2, 3, 6, 8, 12}.difference({k, }), 2)
+    #     for inds in indexes_tuple:
+    #         save_plots_and_coefs_many_ai_zero(k, inds, zeros, end_point, file_dir)
