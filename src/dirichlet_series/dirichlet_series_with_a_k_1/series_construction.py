@@ -1,11 +1,12 @@
 from flint import *
 
 
-def create_one_series(zeros):
+def create_one_series(zeros, k=1):
     """
     Creates Dirichlet series from zeros.
 
     :param zeros: list of zeta-function zeros
+    :param k: a_k = 1
     :return: acb_mat 1xN of series' coefs, N - number of zeros+1
     """
     n = len(zeros) + 1
@@ -14,10 +15,10 @@ def create_one_series(zeros):
     for i, nont_zero in enumerate(zeros):
         for j in range(n):
             a[i, j] = acb(j + 1).pow(-nont_zero)
-    # добавляем строчку, чтобы определить a_1 = 1
+    # добавляем строчку, чтобы определить a_k = 1
     for i in range(1, n):
         a[n - 1, i] = 0
-    a[n - 1, 0] = 1
+    a[n - 1, k-1] = 1
 
     # создаем вектор B и делаем последнюю координату =1, чтобы определить a_1 = 1
     b = acb_mat([[0] for i in range(n)])
