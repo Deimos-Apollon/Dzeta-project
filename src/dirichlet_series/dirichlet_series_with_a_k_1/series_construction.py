@@ -54,16 +54,16 @@ def create_many_series(zeros) -> acb_mat:
             l_mat[j, i] = z
             m[j, i] = z
             for k in range(i + 1, len(zeros)):
-                m[j, k] = m[j, k] + m[i, k] * m[j, i]
+                m[j, k] += m[i, k] * m[j, i]
                 l_mat[j, k] = m[j, k]
 
     for k in range(len(zeros)):
         for i in range(k + 1, len(zeros)):
             for j in range(i + 1, len(zeros)):
-                l_mat[j, k] = l_mat[j, k] + l_mat[i, k] * m[j, i]
+                l_mat[j, k] += l_mat[i, k] * m[j, i]
 
     for j in range(len(zeros)):
-        for k in range(j):
+        for k in range(j-1):
             lin_vect_elem_new[j, k] = l_mat[j, k] * (1 if j == 0 else diagonal[j - 1, 0])
         lin_vect_elem_new[j, j] = (1 if j == 0 else diagonal[j - 1, 0])
         inv_n_tildedelta[j, 0] = acb(1) / lin_vect_elem_new[j, 0]
