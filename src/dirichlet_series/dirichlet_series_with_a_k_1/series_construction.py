@@ -1,7 +1,7 @@
 from flint import *
 
 
-def create_one_series(zeros, k=1):
+def create_one_series(zeros, k=1, algorithm=None):
     """
     Creates Dirichlet series from zeros.
 
@@ -24,7 +24,7 @@ def create_one_series(zeros, k=1):
     b = acb_mat([[0] for i in range(n)])
     b[n - 1, 0] = 1
 
-    x = a.solve(b)
+    x = a.solve(b, algorithm=algorithm)
     return tuple(elem for elem in x)
 
 
