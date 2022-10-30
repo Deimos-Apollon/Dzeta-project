@@ -10,14 +10,12 @@ def create_one_series(zeros, k=1, algorithm=None):
     :return: acb_mat 1xN of series' coefs, N - number of zeros+1
     """
     n = len(zeros) + 1
-    a = acb_mat(n, n)
+    a = acb_mat(n, n, 0)
     # заполняем матрицу коэффициентов
     for i, nont_zero in enumerate(zeros):
         for j in range(n):
             a[i, j] = acb(j + 1).pow(-nont_zero)
-    # добавляем строчку, чтобы определить a_k = 1
-    for i in range(1, n):
-        a[n - 1, i] = 0
+    # добавляем в строчку из 0 на k-ую позицию 1, чтобы определить a_k = 1
     a[n - 1, k-1] = 1
 
     # создаем вектор B и делаем последнюю координату =1, чтобы определить a_1 = 1
